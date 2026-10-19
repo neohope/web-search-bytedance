@@ -87,7 +87,7 @@ python scripts/web_search.py "搜索词" [--count 10] [--type image] [--json]
 
 自然语言 → 参数：「要最新」→ `--time-range OneDay`；「最近一周」→ `OneWeek`；「只要权威来源」→ `--auth-level 1`；「去年到今年」→ `--time-range 2025-01-01..2026-04-09`；「口语长问/结果不稳」→ `--query-rewrite`；「找图/logo」→ `--type image`。
 
-**输出**：文本模式每条给出标题、站点、权威标识、URL 和摘要（单条摘要超过 1000 字符会被标记截断，`--max-chars` 控制整体长度）；`--json` 输出接口原始 payload，不做截断。
+**输出**：文本模式每条给出标题、站点、权威标识、发布日期（`PublishTime` 存在时）、URL（无链接时标注「无法引用」）和摘要（单条摘要超过 1000 字符会被标记截断，`--max-chars` 控制整体长度）；`--json` 输出接口原始 payload，不做截断。
 
 **限流**：单 Key 并发建议 ≤ 5，超限返回 429；脚本对 429/5xx 会自动重试一次（`--retries` 可调）。
 

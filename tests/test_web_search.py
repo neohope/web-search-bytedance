@@ -32,6 +32,7 @@ def web_payload() -> dict:
                     'Title': 'DeepSeek V4 发布',
                     'SiteName': 'Example News',
                     'AuthInfoDes': '权威',
+                    'PublishTime': '2026-06-01T08:00:00+08:00',
                     'Url': 'https://example.com/v4',
                     'Summary': '摘要内容',
                 },
@@ -39,7 +40,7 @@ def web_payload() -> dict:
                     'SortId': 2,
                     'Title': '长摘要结果',
                     'SiteName': 'Forum',
-                    'Url': 'https://forum.example/1',
+                    'Url': '',
                     'Summary': '长' * 1200,
                 },
             ],
@@ -147,7 +148,8 @@ class CliTests(unittest.TestCase):
         self.assertIn('结果数: 2', out)
         self.assertIn('DeepSeek V4 发布', out)
         self.assertIn('https://example.com/v4', out)
-        self.assertIn('Example News', out)
+        self.assertIn('Example News | 权威 | 2026-06-01', out)
+        self.assertIn('(该结果无链接，无法引用)', out)
 
     def test_long_summary_is_marked_when_cut(self):
         code, out, _ = run_cli('普通查询', '--api-key', 'test-key')

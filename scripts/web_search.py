@@ -422,10 +422,15 @@ def format_text(data: dict, search_type: str, max_chars: int = DEFAULT_MAX_CHARS
         for item in result.get("WebResults") or []:
             lines.append(f"[{item.get('SortId', '')}] {item.get('Title', '')}")
             meta_parts = [part for part in [item.get("SiteName", ""), item.get("AuthInfoDes", "")] if part]
+            published = str(item.get("PublishTime") or "")[:10]
+            if published:
+                meta_parts.append(published)
             if meta_parts:
                 lines.append(f"    {' | '.join(meta_parts)}")
             if item.get("Url"):
                 lines.append(f"    {item['Url']}")
+            else:
+                lines.append("    (该结果无链接，无法引用)")
             summary = item.get("Summary") or item.get("Snippet", "")
             if summary:
                 lines.append(f"    {_preview(summary)}")
