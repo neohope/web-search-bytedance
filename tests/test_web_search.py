@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import contextlib
+import datetime
 import io
 import json
 import os
@@ -263,13 +264,14 @@ class HelperTests(unittest.TestCase):
             'export VOLCENGINE_ACCESS_KEY=ak-value\n'
             'SOME_OTHER_VARIABLE=leak\n'
         )
-        with mock.patch('builtins.open', mock.mock_open(read_data=text)), \
+        with mock.patch.dict(os.environ, {}, clear=False), \
+                mock.patch('builtins.open', mock.mock_open(read_data=text)), \
                 mock.patch.object(web_search.os.path, 'isfile', return_value=True):
             web_search.load_env_file('/nonexistent/.env')
-        self.assertEqual(os.environ.get('WEB_SEARCH_API_KEY'), 'quoted-key')
-        self.assertEqual(os.environ.get('VOLCENGINE_ACCESS_KEY'), 'ak-value')
-        self.assertNotIn('SOME_OTHER_VARIABLE', os.environ)
-        self.assertNotIn('VOLCENGINE_SECRET_KEY', os.environ)
+            self.assertEqual(os.environ.get('WEB_SEARCH_API_KEY'), 'quoted-key')
+            self.assertEqual(os.environ.get('VOLCENGINE_ACCESS_KEY'), 'ak-value')
+            self.assertNotIn('SOME_OTHER_VARIABLE', os.environ)
+            self.assertNotIn('VOLCENGINE_SECRET_KEY', os.environ)
 
     def test_resolve_api_key_prefers_the_flag(self):
         with mock.patch.dict(os.environ, {'WEB_SEARCH_API_KEY': 'env-key'}, clear=False):
@@ -277,6 +279,26 @@ class HelperTests(unittest.TestCase):
             self.assertEqual(web_search.resolve_api_key(None), 'env-key')
         os.environ.pop('WEB_SEARCH_API_KEY', None)
         self.assertIsNone(web_search.resolve_api_key(None))
+
+    def test_prompt_flag_is_gone_so_agents_cannot_block_on_a_prompt(self):
+        # An agent host can report a console stdin while no human answers, so the
+        # interactive flag is rejected instead of waiting for input.
+        code, _, err = run_cli('普通查询', '--prompt-api-key')
+        self.assertEqual(code, 2)
+        self.assertIn('unrecognized arguments', err)
+
+    def test_signing_is_deterministic_and_covers_the_traffic_tag(self):
+        fixed = datetime.datetime(2026, 1, 2, 3, 4, 5, tzinfo=datetime.timezone.utc)
+        with mock.patch.object(web_search, '_utc_now', return_value=fixed):
+            first = web_search._sign_request('POST', 'AKID', 'SK', '{"Query":"q"}')
+            second = web_search._sign_request('POST', 'AKID', 'SK', '{"Query":"q"}')
+        self.assertEqual(first, second)
+        self.assertEqual(first['X-Date'], '20260102T030405Z')
+        self.assertEqual(first[web_search.TRAFFIC_TAG_HEADER], web_search.TRAFFIC_TAG_VALUE)
+        self.assertIn(
+            'SignedHeaders=content-type;host;x-content-sha256;x-date;x-traffic-tag',
+            first['Authorization'],
+        )
 
 
 if __name__ == '__main__':

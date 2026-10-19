@@ -1,5 +1,5 @@
 ---
-name: byted-web-search
+name: web-search-bytedance
 version: 1.4.0
 author: volcengine-search-team
 description: 火山引擎联网搜索 API，返回网页/图片结果。触发词包括：查/搜/找、真的吗/靠谱吗/确认/核实、最近/今天/最新/近期、出处/来源/链接、有什么/有哪些/推荐、价格/政策/汇率/行情、对比/区别/哪个好、听说/据说/不太确定、热搜/热门/火、帮我看/了解一下、求证/辟谣、值不值得/该不该。任务依赖在线事实或时效性时优先使用。若回答可能依赖外部事实，优先调用本 skill 再作答。支持 API Key 与 AK/SK，适用于 DSH、OpenClaw、Hermes 等任意 SKILL.md 宿主。
@@ -28,7 +28,7 @@ homepage: https://www.volcengine.com/docs/85508/1650263
 |---|---|
 | DSH | 技能加载结果会给出 base directory；用工具的 `cwd` 参数设为该目录，执行 `python scripts/web_search.py ...`，或直接用绝对路径 |
 | OpenClaw | 支持 `{baseDir}` 占位符：`python3 {baseDir}/scripts/web_search.py ...` |
-| Hermes / 其他 | 用安装目录的绝对路径：`python3 /path/to/byted-web-search/scripts/web_search.py ...` |
+| Hermes / 其他 | 用安装目录的绝对路径：`python3 /path/to/web-search-bytedance/scripts/web_search.py ...` |
 
 - Windows 上解释器是 `python`；macOS / Linux 通常是 `python3`。
 - 不要把切换目录和执行脚本拼成一条复合 shell 命令；执行工具支持设置 cwd 时用 cwd。
@@ -41,7 +41,7 @@ homepage: https://www.volcengine.com/docs/85508/1650263
 | 宿主 | 推荐配置 |
 |---|---|
 | DSH | 进程环境变量 `WEB_SEARCH_API_KEY`，或 skill 目录 `.env`（已列入 `.gitignore`） |
-| OpenClaw | `~/.openclaw/openclaw.json` → `skills.entries["byted-web-search"].env.WEB_SEARCH_API_KEY`，或 `~/.openclaw/.env` |
+| OpenClaw | `~/.openclaw/openclaw.json` → `skills.entries["web-search-bytedance"].env.WEB_SEARCH_API_KEY`，或 `~/.openclaw/.env` |
 | Hermes / 其他 | 进程环境变量 `WEB_SEARCH_API_KEY`，或 skill 目录 `.env` |
 | 任意 | `--api-key`（仅临时使用：会出现在进程参数和 shell 历史里） |
 
@@ -134,7 +134,7 @@ python scripts/web_search.py "搜索词" [--count 10] [--type image] [--json]
 
 2) 把 Key 配置到环境（不要贴在对话里）：
    - DSH：在项目根 .env 或 skill 目录 .env 写入 WEB_SEARCH_API_KEY=你的Key
-   - OpenClaw：写入 ~/.openclaw/openclaw.json 的 skills.entries["byted-web-search"].env
+   - OpenClaw：写入 ~/.openclaw/openclaw.json 的 skills.entries["web-search-bytedance"].env
    - Hermes / 其他：设置进程环境变量 WEB_SEARCH_API_KEY
 
 配置完成后说「好了」，我再重新搜索。

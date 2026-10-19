@@ -1,10 +1,10 @@
-# byted-web-search
+# web-search-bytedance
 
 An agent skill for the Volcengine (ByteDance) web search API: it returns web or image results and supports API Key and AK/SK credentials. One `SKILL.md` plus one Python script runs in DSH, OpenClaw, Hermes, or any host that loads `SKILL.md` skills.
 
 [中文](README.md)
 
-> The repository is named `web-search-bytedance`; the skill is named `byted-web-search`. Install the directory as `byted-web-search` so the name matches.
+> The repository, the skill name, and the install directory are all `web-search-bytedance`, so host-side skill keys (for example OpenClaw's `skills.entries`) line up.
 
 ## What it does
 
@@ -20,27 +20,44 @@ An agent skill for the Volcengine (ByteDance) web search API: it returns web or 
 Copy a directory containing `SKILL.md` into the skills root your harness scans.
 
 ```bash
-git clone https://github.com/neohope/web-search-bytedance.git byted-web-search
-cp -r byted-web-search ~/.agents/skills/          # replace with your host's skills root
+git clone https://github.com/neohope/web-search-bytedance.git
+cp -r web-search-bytedance ~/.agents/skills/          # replace with your host's skills root
 ```
 
 | Host | Skills root | Credential injection |
 |---|---|---|
 | DSH | `<project>/.agents/skills/`, `~/.dsh/skills/`, `~/.agents/skills/` | `WEB_SEARCH_API_KEY` in the process environment, or the skill's `.env` |
-| OpenClaw | OpenClaw skill directory | `~/.openclaw/openclaw.json` → `skills.entries["byted-web-search"].env`, or `~/.openclaw/.env` |
+| OpenClaw | OpenClaw skill directory | `~/.openclaw/openclaw.json` → `skills.entries["web-search-bytedance"].env`, or `~/.openclaw/.env` |
 | Hermes | Hermes skill directory | `WEB_SEARCH_API_KEY`, or the skill's `.env` |
 | Other (Claude Code, Codex, …) | that host's skills root | `WEB_SEARCH_API_KEY`, or the skill's `.env` |
 
 ## Quick start
 
 ```bash
-export WEB_SEARCH_API_KEY=...          # PowerShell: $env:WEB_SEARCH_API_KEY = '...'
+cp .env.example .env                   # fill in WEB_SEARCH_API_KEY; .env is gitignored
 python scripts/web_search.py "Beijing weather today"
 python scripts/web_search.py "DeepSeek release notes" --time-range OneWeek --json
 python scripts/web_search.py "Forbidden City" --type image --count 3
 ```
 
 Use `python` on Windows and `python3` on macOS or Linux. Locate the script the way your host expects: DSH passes a base directory for the loaded skill, OpenClaw substitutes `{baseDir}`, and other hosts use the absolute path of the installed skill.
+
+## Flags
+
+| Flag | Default | Meaning |
+|---|---|---|
+| `<query>` | required | 1–100 characters |
+| `--type` / `-t` | `web` | `web` or `image` |
+| `--time-range` | unbounded | Four shortcuts or `YYYY-MM-DD..YYYY-MM-DD` |
+| `--count` / `-c` | `10` | web ≤ 50, image ≤ 5 |
+| `--auth-level` | `0` | `1` for authoritative sources only |
+| `--query-rewrite` | off | Service-side query rewrite |
+| `--json` | off | Raw JSON payload for scripts |
+| `--max-chars` | `20000` | Text output cap, `0` disables |
+| `--timeout` | `30` | Per-request timeout in seconds |
+| `--retries` | `1` | Retries for 408/429/5xx and network errors |
+
+Exit codes: `0` success (including zero results), `1` credential or API failure, `2` usage error.
 
 ## Security
 
@@ -56,6 +73,10 @@ python -m unittest discover -s tests -v
 ```
 
 The suite runs the CLI against a local mock of the search endpoint, so it needs no key and no network.
+
+## Changes from upstream
+
+Based on the official Volcengine skill `v1.3.4`; the request body and HMAC signing are unchanged. See [CHANGELOG.md](CHANGELOG.md) for the maintained list.
 
 ## License
 

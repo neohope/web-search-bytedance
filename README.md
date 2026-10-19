@@ -1,10 +1,10 @@
-# byted-web-search
+# web-search-bytedance
 
 火山引擎联网搜索 API 的 Agent Skill：调用官方接口返回网页 / 图片结果，支持 API Key 与 AK/SK。同一份 `SKILL.md` + Python 脚本可运行在 DSH、OpenClaw、Hermes 等任何支持 `SKILL.md` 的宿主上。
 
 [English](README.en.md)
 
-> 仓库名是 `web-search-bytedance`，技能名是 `byted-web-search`。安装时建议把目录命名为 `byted-web-search`，与技能名一致。
+> 仓库名、技能名与安装目录统一为 `web-search-bytedance`，三者一致时宿主的技能键（例如 OpenClaw 的 `skills.entries`）不会对不上。
 
 ## 能力
 
@@ -21,30 +21,32 @@
 
 | 宿主 | 安装位置 | 凭证注入 |
 |---|---|---|
-| DSH | `<project>/.agents/skills/byted-web-search/` 或 `~/.dsh/skills/`、`~/.agents/skills/` | 进程环境变量 `WEB_SEARCH_API_KEY`，或技能目录 `.env` |
-| OpenClaw | OpenClaw 的技能目录 | `~/.openclaw/openclaw.json` → `skills.entries["byted-web-search"].env`，或 `~/.openclaw/.env` |
+| DSH | `<project>/.agents/skills/web-search-bytedance/`，或 `~/.dsh/skills/`、`~/.agents/skills/` | 进程环境变量 `WEB_SEARCH_API_KEY`，或技能目录 `.env` |
+| OpenClaw | OpenClaw 的技能目录 | `~/.openclaw/openclaw.json` → `skills.entries["web-search-bytedance"].env`，或 `~/.openclaw/.env` |
 | Hermes | Hermes 的技能目录 | 进程环境变量 `WEB_SEARCH_API_KEY`，或技能目录 `.env` |
 | 其他（Claude Code、Codex 等） | 该宿主的技能根目录 | 进程环境变量 `WEB_SEARCH_API_KEY`，或技能目录 `.env` |
 
 安装只要让宿主看到包含 `SKILL.md` 的目录即可：
 
 ```bash
-git clone https://github.com/neohope/web-search-bytedance.git byted-web-search
-cp -r byted-web-search ~/.agents/skills/          # 换成你的宿主使用的技能根目录
+git clone https://github.com/neohope/web-search-bytedance.git
+cp -r web-search-bytedance ~/.agents/skills/          # 换成你的宿主使用的技能根目录
 ```
 
-Windows：`Copy-Item -Recurse byted-web-search $HOME\.agents\skills\`。
+Windows：`Copy-Item -Recurse web-search-bytedance $HOME\.agents\skills\`。
 
 ## 快速开始
 
 ```bash
-export WEB_SEARCH_API_KEY=...          # PowerShell: $env:WEB_SEARCH_API_KEY = '...'
+cp .env.example .env                   # 填入 WEB_SEARCH_API_KEY；.env 已被 .gitignore 排除
 python scripts/web_search.py "北京今日天气"
 python scripts/web_search.py "DeepSeek 最新发布" --time-range OneWeek --json
 python scripts/web_search.py "故宫博物院" --type image --count 3
 ```
 
-Windows 用 `python`，macOS / Linux 用 `python3`。脚本按宿主方式定位：DSH 用技能加载结果给出的 base directory（配合工具的 cwd 参数），OpenClaw 支持 `{baseDir}` 占位符，其他宿主用安装目录的绝对路径。SKILL.md 中对每种宿主都写了具体命令。
+也可以不建 `.env`，直接把 `WEB_SEARCH_API_KEY` 注入进程环境（`export` / `$env:` / 宿主的凭证配置）。
+
+Windows 用 `python`，macOS / Linux 用 `python3`。脚本按宿主方式定位：DSH 用技能加载结果给出的 base directory（配合工具的 cwd 参数），OpenClaw 支持 `{baseDir}` 占位符，其他宿主用安装目录的绝对路径；SKILL.md 中对每种宿主都写了具体命令。
 
 ## 参数
 
@@ -73,15 +75,15 @@ Windows 用 `python`，macOS / Linux 用 `python3`。脚本按宿主方式定位
 
 ## 与上游的关系
 
-本仓库基于火山引擎官方 skill `v1.3.4` 打包，保留原有的请求体与 HMAC 签名逻辑，`v1.4.0` 的改动集中在宿主兼容性与工程化：
+本仓库基于火山引擎官方 skill `v1.3.4` 打包，保留原有的请求体与 HMAC 签名逻辑；改动清单见 [CHANGELOG.md](CHANGELOG.md)，要点：
 
-- 去掉 `requests` 依赖，改为标准库 `urllib`，任意 Python 3.9+ 环境可直接运行；
+- 去掉 `requests` 依赖，改为标准库 `urllib`；
 - Windows 下强制 UTF-8 输出，修复中文结果乱码；
-- 凭证文件只按白名单读取，避免 `.env` 污染进程环境；
-- 新增 `--json`、`--max-chars`、`--timeout`、`--retries`；摘要与整体输出截断会显式标记；
-- 429/5xx 与网络错误自动重试一次（可配置）；
-- 文档按宿主拆分（DSH / OpenClaw / Hermes / 通用），移除宿主专属的"记忆"指令与"把 Key 发到聊天框"的主推路径；
-- 补 `.gitignore`、`.gitattributes`、测试与 CI。
+- 凭证文件只按白名单读取；
+- 新增 `--json`、`--max-chars`、`--timeout`、`--retries`，摘要与整体输出截断显式标记；
+- 429/5xx 与网络错误自动重试一次；
+- 文档按宿主拆分，移除宿主专属的「记忆」指令与「把 Key 发到聊天框」的主推路径；
+- 补 `.env.example`、`.gitignore`、`.gitattributes`、测试与 CI。
 
 ## 目录结构
 
@@ -93,6 +95,8 @@ references/
 └── docs-index.md        官方文档、控制台、完整错误码表
 tests/test_web_search.py 参数校验、格式化、环境变量白名单、mock 接口与重试
 agents/openai.yaml       读取该文件的宿主的展示元数据
+.env.example             凭证模板（复制为 .env）
+CHANGELOG.md             版本与改动记录
 .github/workflows/ci.yml ubuntu/windows × Python 3.9/3.11/3.13 的测试矩阵
 LICENSE                  Apache License 2.0
 ```
@@ -103,7 +107,7 @@ LICENSE                  Apache License 2.0
 python -m unittest discover -s tests -v
 ```
 
-测试启动本地 mock 服务模拟搜索接口，不需要 Key、不访问外网，覆盖参数校验、时间区间解析、文本与 JSON 输出、摘要截断、429 重试、错误码提示、凭证缺失与 `.env` 白名单。
+测试启动本地 mock 服务模拟搜索接口，不需要 Key、不访问外网，覆盖参数校验、时间区间解析、文本与 JSON 输出、摘要截断、429/503 重试、错误码提示、凭证缺失、`.env` 白名单与签名字段。
 
 ## 许可证
 

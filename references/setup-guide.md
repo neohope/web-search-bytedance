@@ -1,4 +1,4 @@
-# byted-web-search — 开通与配置
+# web-search-bytedance — 开通与配置
 
 ## 1. 注册与开通
 
@@ -21,14 +21,14 @@
 
 ### DSH
 
-在项目根 `.env` 写 `WEB_SEARCH_API_KEY=...`（由 shell 或执行工具注入），或在技能目录 `.env` 写同名变量（脚本会读取，且该文件已被 `.gitignore` 排除）。不要用聊天消息传递 Key——会话日志会持久化。
+在项目根 `.env` 写 `WEB_SEARCH_API_KEY=...`（由 shell 或执行工具注入），或在技能目录复制 `.env.example` 为 `.env` 后填写（脚本会读取，且该文件已被 `.gitignore` 排除）。不要用聊天消息传递 Key——会话日志会持久化。
 
 ### OpenClaw
 
 编辑 `~/.openclaw/openclaw.json`，在 `skills.entries` 下加入：
 
 ```json
-"byted-web-search": {
+"web-search-bytedance": {
   "enabled": true,
   "env": { "WEB_SEARCH_API_KEY": "你的Key" }
 }
@@ -38,7 +38,7 @@
 
 ### Hermes
 
-设置进程环境变量 `WEB_SEARCH_API_KEY`，或在技能目录创建 `.env`。若 Hermes 有自己的凭证/环境变量注入配置，优先用它，效果等价。
+设置进程环境变量 `WEB_SEARCH_API_KEY`，或在技能目录创建 `.env`（可复制 `.env.example` 后填写）。若 Hermes 有自己的凭证/环境变量注入配置，优先用它，效果等价。
 
 ### 其他宿主（Claude Code、Codex 等）
 

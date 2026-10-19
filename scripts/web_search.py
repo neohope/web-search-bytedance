@@ -41,7 +41,6 @@
 
 import argparse
 import datetime
-import getpass
 import hashlib
 import hmac
 import json
@@ -268,15 +267,12 @@ def get_credentials() -> tuple:
         return None, None, ""
 
 
-def resolve_api_key(cli_api_key: Optional[str], prompt: bool = False) -> Optional[str]:
-    """Resolve the API key from the flag, the environment, or an interactive prompt."""
+def resolve_api_key(cli_api_key: Optional[str]) -> Optional[str]:
+    """Resolve the API key from the flag or the environment; agent hosts have no prompt."""
     api_key = cli_api_key or os.getenv("WEB_SEARCH_API_KEY")
-    if api_key:
-        return api_key.strip() or None
-    if prompt:
-        entered = getpass.getpass("API Key: ").strip()
-        return entered or None
-    return None
+    if not api_key:
+        return None
+    return api_key.strip() or None
 
 
 def _validate_time_range(time_range: Optional[str]) -> Optional[str]:
@@ -463,7 +459,6 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--auth-level", type=int, default=0, choices=[0, 1])
     parser.add_argument("--query-rewrite", action="store_true", help="开启 Query 改写")
     parser.add_argument("--api-key", help="API Key（优先于环境变量 WEB_SEARCH_API_KEY）")
-    parser.add_argument("--prompt-api-key", action="store_true", help="交互式输入 API Key（不回显）")
     parser.add_argument("--json", action="store_true", help="输出接口原始 JSON，便于脚本处理")
     parser.add_argument(
         "--max-chars",
@@ -508,7 +503,7 @@ def main(argv: Optional[list] = None) -> int:
     except ValueError as exc:
         return usage_error(str(exc))
 
-    api_key = resolve_api_key(args.api_key, args.prompt_api_key)
+    api_key = resolve_api_key(args.api_key)
     ak = sk = session_token = None
     if not api_key:
         ak, sk, session_token = get_credentials()

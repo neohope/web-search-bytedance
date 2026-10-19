@@ -1,4 +1,4 @@
 interface:
-  display_name: "Byted Web Search"
+  display_name: "Web Search (Bytedance)"
   short_description: "Volcengine web and image search for agents"
-  default_prompt: "Use $byted-web-search to search the web for current information."
+  default_prompt: "Use $web-search-bytedance to search the web for current information."
